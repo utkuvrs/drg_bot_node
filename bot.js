@@ -1,6 +1,7 @@
 const { Client, GatewayIntentBits, REST, Routes } = require('discord.js');
 require('dotenv').config();
 const axios = require('axios');
+const { getEmojiByName: emote } = require('./emojis.js'); // Import the emoji functions
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildPresences] });
@@ -58,8 +59,7 @@ client.once('ready', () => {
             ],
             status: 'online', // The status can be 'online', 'idle', 'dnd', or 'invisible'
         });
-    }
-    else if (randomNumber > 50 && randomNumber <= 75) {
+    } else if (randomNumber > 50 && randomNumber <= 75) {
         client.user.setPresence({
             activities: [
                 {
@@ -69,8 +69,7 @@ client.once('ready', () => {
             ],
             status: 'online', // The status can be 'online', 'idle', 'dnd', or 'invisible'
         });
-    }
-    else {
+    } else {
         client.user.setPresence({
             activities: [
                 {
@@ -82,6 +81,22 @@ client.once('ready', () => {
         });
     }
 });
+
+// Function to split a message into chunks
+function splitMessage(message, maxLength = 2000) {
+    const parts = [];
+    while (message.length > maxLength) {
+        let chunk = message.slice(0, maxLength);
+        const lastLineBreak = chunk.lastIndexOf('\n');
+        if (lastLineBreak > 0) {
+            chunk = message.slice(0, lastLineBreak + 1);
+        }
+        parts.push(chunk);
+        message = message.slice(chunk.length);
+    }
+    parts.push(message);
+    return parts;
+}
 
 // Event handler for interactions (including slash commands)
 client.on('interactionCreate', async interaction => {
@@ -102,42 +117,66 @@ client.on('interactionCreate', async interaction => {
             const response = await axios.get(url);
             const data = response.data;
 
-            if (data['Deep Dives']) {
-                let reply = '';
+            let normalContent = "**Deep Dive Normal Information:**\n";
+            let eliteContent = "**Deep Dive Elite Information:**\n";
 
-                // Use custom emoji in the message
-                const customEmoji = '<:Volatile_Guts:1285907803831271475>'; // Replace with your emoji name and ID
-                reply += `**${customEmoji} Deep Dive Data**\n`;
+            const normalDive = data["Deep Dives"]["Deep Dive Normal"];
+            const eliteDive = data["Deep Dives"]["Deep Dive Elite"];
 
-                for (const [type, deepDive] of Object.entries(data['Deep Dives'])) {
-                    reply += `**${type}**\n`;
-                    reply += `**Biome:** ${deepDive.Biome}\n`;
-                    reply += `**CodeName:** ${deepDive.CodeName}\n\n`;
+            if (normalDive) {
+                normalContent += `Biome: (${emote(normalDive.Biome)}) ${normalDive.Biome}\n`;
+                normalContent += `CodeName: ${normalDive.CodeName}\n`;
 
-                    deepDive.Stages.forEach(stage => {
-                        reply += `**Stage ID:** ${stage.id}\n`;
-                        reply += `**Length:** ${stage.Length}\n`;
-                        reply += `**Complexity:** ${stage.Complexity}\n`;
-                        reply += `**Primary Objective:** ${stage.PrimaryObjective}\n`;
-                        reply += `**Secondary Objective:** ${stage.SecondaryObjective}\n`;
+                normalDive.Stages.forEach((stage, index) => {
+                    normalContent += `Stage ${index + 1}:\n`;
+                    normalContent += `  - Length: (${emote("Length_" + stage.Length)}) ${stage.Length}\n`;
+                    normalContent += `  - Complexity: (${emote("Complexity_" + stage.Complexity)}) ${stage.Complexity}\n`;
+                    if (stage.MissionWarnings) {
+                        normalContent += `  - Mission Warnings: ${stage.MissionWarnings.map(warning => emote(warning)).join(', ')}\n`;
+                    }
+                    if (stage.MissionMutator) {
+                        normalContent += `  - Mission Mutator: ${emote(stage.MissionMutator)}\n`;
+                    }
+                    normalContent += `  - Primary Objective: (${emote(stage.PrimaryObjective)}) ${stage.PrimaryObjective}\n`;
+                    normalContent += `  - Secondary Objective: (${emote(stage.SecondaryObjective)}) ${stage.SecondaryObjective}\n`;
+                });
 
-                        if (stage.MissionWarnings) {
-                            reply += `**Mission Warnings:** ${stage.MissionWarnings.join(', ')}\n`;
-                        }
+                normalContent += '\n';
+            }
 
-                        if (stage.MissionMutator) {
-                            reply += `**Mission Mutator:** ${stage.MissionMutator}\n`;
-                        }
+            if (eliteDive) {
+                eliteContent += `Biome: (${emote(eliteDive.Biome)}) ${eliteDive.Biome}\n`;
+                eliteContent += `CodeName: ${eliteDive.CodeName}\n`;
 
-                        reply += '\n';
-                    });
+                eliteDive.Stages.forEach((stage, index) => {
+                    eliteContent += `Stage ${index + 1}:\n`;
+                    eliteContent += `  - Length: (${emote("Length_" + stage.Length)}) ${stage.Length}\n`;
+                    eliteContent += `  - Complexity: (${emote("Complexity_" + stage.Complexity)}) ${stage.Complexity}\n`;
+                    if (stage.MissionWarnings) {
+                        eliteContent += `  - Mission Warnings: ${stage.MissionWarnings.map(warning => emote(warning)).join(', ')}\n`;
+                    }
+                    if (stage.MissionMutator) {
+                        eliteContent += `  - Mission Mutator: ${emote(stage.MissionMutator)}\n`;
+                    }
+                    eliteContent += `  - Primary Objective: (${emote(stage.PrimaryObjective)}) ${stage.PrimaryObjective}\n`;
+                    eliteContent += `  - Secondary Objective: (${emote(stage.SecondaryObjective)}) ${stage.SecondaryObjective}\n`;
+                });
 
-                    reply += '\n---\n\n';
-                }
+                eliteContent += '\n';
+            }
 
-                await interaction.reply(reply);
-            } else {
-                await interaction.reply('No Deep Dive data found at the provided URL.');
+            // Split messages if they are too long
+            const normalMessageParts = splitMessage(normalContent);
+            const eliteMessageParts = splitMessage(eliteContent);
+
+            // Send the normal dive information
+            for (const part of normalMessageParts) {
+                await interaction.reply({ content: part, ephemeral: true });
+            }
+
+            // Send the elite dive information
+            for (const part of eliteMessageParts) {
+                await interaction.followUp({ content: part, ephemeral: true });
             }
         } catch (error) {
             console.error(error);

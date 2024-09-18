@@ -2,7 +2,7 @@
 const emojiMap = {
     'Volatile_Guts': '1285907803831271475',
     'Another_Emoji': '123456789012345678',
-    "Volatile_Guts": '1285907803831271475',
+    'Volatile_Guts': '1285907803831271475',
     "Swarmageddon": '1285907796449296434',
     "Space_Rig": '1285907789356470374',
     "Shield_Disruption": '1285907780967858217',
@@ -79,8 +79,9 @@ const emojiMap = {
 
 // Function to get an emoji by name
 function getEmojiByName(name) {
-    const emojiId = emojiMap[name];
-    return emojiId ? `"${name}:${emojiId}>` : null;
+    const formattedEmoteName = name.toString().replace(/ /g, '_');
+    const emojiId = emojiMap[formattedEmoteName];
+    return emojiId ? `<:${formattedEmoteName}:${emojiId}>` : null;
 }
 
 // Export the function and mapping
