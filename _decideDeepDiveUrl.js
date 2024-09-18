@@ -34,16 +34,24 @@ function _decideDeepDiveUrl(baseUrl) {
     var daysDifference = (now - dateUrl) / (1000 * 60 * 60 * 24);
     if (daysDifference >= 7) {
         console.log('The date is older than 7 days.');
+
         var nextDeepDiveDate = addDays(dateUrl, 7);
         var nextDeepDiveSubUrl = _convertIsoStringToSubUrl(nextDeepDiveDate.toISOString());
+
         BASE_DEEP_DIVE_URL = `https://doublexp.net/static/json/DD_${nextDeepDiveSubUrl}.json`;
         console.log("1 | New URL:" + BASE_DEEP_DIVE_URL);
         return BASE_DEEP_DIVE_URL;
     } else {
         console.log('The date is within the last 7 days.');
-        var nextDeepDiveSubUrl = _convertIsoStringToSubUrl(dateUrl.toISOString());
-        BASE_DEEP_DIVE_URL = `https://doublexp.net/static/json/DD_${nextDeepDiveSubUrl}.json`;
-        console.log("2 | New URL:" + BASE_DEEP_DIVE_URL);
+
+        var currentDeepDiveSubUrl = _convertIsoStringToSubUrl(dateUrl.toISOString());
+        BASE_DEEP_DIVE_URL = `https://doublexp.net/static/json/DD_${currentDeepDiveSubUrl}.json`;
+        console.log("2 | New URL: " + BASE_DEEP_DIVE_URL);
+
+
+        var nextDeepDiveDate = addDays(dateUrl, 7);
+        var nextDeepDiveSubUrl = `https://doublexp.net/static/json/DD_${_convertIsoStringToSubUrl(nextDeepDiveDate.toISOString())}.json`;
+        console.log("Next URL will be: " + nextDeepDiveSubUrl);
         return BASE_DEEP_DIVE_URL;
     }
 
@@ -71,6 +79,9 @@ function convertToISO8601(inputDateString) {
 
     // Create a Date object
     var dateObj = new Date(`${date}T${time}`);
+    var tzoffset = (dateObj).getTimezoneOffset() * 60000; //offset in milliseconds
+    var localISOTime = (new Date(dateObj - tzoffset)).toISOString().slice(0, -1);
+
 
     // Check if the Date object is valid
     if (isNaN(dateObj.getTime())) {
@@ -78,7 +89,7 @@ function convertToISO8601(inputDateString) {
     }
 
     // Convert the Date object to an ISO 8601 string
-    return dateObj.toISOString();
+    return localISOTime + "Z";
 }
 
 function _convertIsoStringToSubUrl(isoString) {
