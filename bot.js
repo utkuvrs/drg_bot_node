@@ -2,6 +2,7 @@ const { Client, GatewayIntentBits, REST, Routes } = require('discord.js');
 require('dotenv').config();
 const axios = require('axios');
 const { getEmojiByName: emote } = require('./emojis.js'); // Import the emoji functions
+const { _decideDeepDiveUrl } = require('./_decideDeepDiveUrl.js');
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildPresences] });
@@ -9,20 +10,13 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBit
 const token = process.env.BOT_TOKEN;
 const clientId = process.env.CLIENT_ID;
 const guildId = process.env.GUILD_ID;
-
+var BASE_DEEP_DIVE_URL = "https://doublexp.net/static/json/DD_2024-09-12T11-00-00Z.json";
+var NEXT_DEEP_DIVE_URL = "https://doublexp.net/static/json/DD_2024-09-19T11-00-00Z.json";
 // Register slash commands
 const commands = [
     {
         name: 'deepdive',
         description: 'Get information about Deep Dives from a URL',
-        options: [
-            {
-                name: 'url',
-                type: 3, // STRING type
-                description: 'The URL to fetch Deep Dive data from',
-                required: true,
-            },
-        ],
     },
 ];
 
@@ -102,10 +96,11 @@ function splitMessage(message, maxLength = 2000) {
 client.on('interactionCreate', async interaction => {
     if (!interaction.isCommand()) return;
 
-    const { commandName, options } = interaction;
+    const { commandName } = interaction;
 
     if (commandName === 'deepdive') {
-        const url = options.getString('url');
+
+        const url = _decideDeepDiveUrl(BASE_DEEP_DIVE_URL);
 
         if (!url || !url.startsWith('http')) {
             await interaction.reply('Invalid URL. Please provide a valid URL.');
