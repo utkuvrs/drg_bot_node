@@ -16,7 +16,7 @@ var NEXT_DEEP_DIVE_URL = "https://doublexp.net/static/json/DD_2024-09-19T11-00-0
 const commands = [
     {
         name: 'deepdive',
-        description: 'Get information about Deep Dives from a URL',
+        description: 'Get information about Deep Dives.',
     },
 ];
 
