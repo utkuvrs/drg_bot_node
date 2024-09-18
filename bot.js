@@ -3,7 +3,7 @@ require('dotenv').config();
 const axios = require('axios');
 
 // Create a new client instance
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildPresences] });
 
 const token = process.env.BOT_TOKEN;
 const clientId = process.env.CLIENT_ID;
@@ -44,6 +44,43 @@ const rest = new REST({ version: '10' }).setToken(token);
 // When the client is ready, run this code
 client.once('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
+
+    // Set the bot's presence
+    const randomNumber = Math.floor(Math.random() * 100) + 1;
+
+    if (randomNumber <= 50) {
+        client.user.setPresence({
+            activities: [
+                {
+                    name: 'Exploring Deep Dives', // Your custom activity
+                    type: 'WATCHING', // You can use PLAYING, STREAMING, LISTENING, or WATCHING
+                },
+            ],
+            status: 'online', // The status can be 'online', 'idle', 'dnd', or 'invisible'
+        });
+    }
+    else if (randomNumber > 50 && randomNumber <= 75) {
+        client.user.setPresence({
+            activities: [
+                {
+                    name: 'Sniping Tina :)', // Your custom activity
+                    type: 'PLAYING', // You can use PLAYING, STREAMING, LISTENING, or WATCHING
+                },
+            ],
+            status: 'online', // The status can be 'online', 'idle', 'dnd', or 'invisible'
+        });
+    }
+    else {
+        client.user.setPresence({
+            activities: [
+                {
+                    name: 'Balling on Janner', // Your custom activity
+                    type: 'PLAYING', // You can use PLAYING, STREAMING, LISTENING, or WATCHING
+                },
+            ],
+            status: 'online', // The status can be 'online', 'idle', 'dnd', or 'invisible'
+        });
+    }
 });
 
 // Event handler for interactions (including slash commands)
@@ -67,6 +104,10 @@ client.on('interactionCreate', async interaction => {
 
             if (data['Deep Dives']) {
                 let reply = '';
+
+                // Use custom emoji in the message
+                const customEmoji = '<:Volatile_Guts:1285907803831271475>'; // Replace with your emoji name and ID
+                reply += `**${customEmoji} Deep Dive Data**\n`;
 
                 for (const [type, deepDive] of Object.entries(data['Deep Dives'])) {
                     reply += `**${type}**\n`;
