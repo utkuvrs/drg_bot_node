@@ -1,4 +1,6 @@
 const { Client, GatewayIntentBits, REST, Routes } = require('discord.js');
+const { sendBiomesEmbed } = require('./biomesCommand');
+
 require('dotenv').config();
 const axios = require('axios');
 const { getEmojiByName: emote } = require('./emojis.js'); // Import the emoji functions
@@ -10,13 +12,39 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBit
 const token = process.env.BOT_TOKEN;
 const clientId = process.env.CLIENT_ID;
 const guildId = process.env.GUILD_ID;
+
 var BASE_DEEP_DIVE_URL = "https://doublexp.net/static/json/DD_2024-09-12T11-00-00Z.json";
 var NEXT_DEEP_DIVE_URL = "https://doublexp.net/static/json/DD_2024-09-19T11-00-00Z.json";
+const CURRENT_MISSIONS_URL = 'https://doublexp.net/json?data=current';
+const NEXT_MISSIONS_URL = 'https://doublexp.net/json?data=next';
+
 // Register slash commands
 const commands = [
     {
         name: 'deepdive',
         description: 'Get information about Deep Dives.',
+    },
+    {
+        name: 'missions',
+        description: 'Get the current missions.',
+        options: [
+            {
+                name: 'type',
+                description: 'Choose between current and next missions.',
+                type: 3, // Type 3 is STRING
+                required: true,
+                choices: [
+                    {
+                        name: 'current',
+                        value: 'current',
+                    },
+                    {
+                        name: 'next',
+                        value: 'next',
+                    },
+                ],
+            },
+        ],
     },
 ];
 
@@ -96,7 +124,17 @@ function splitMessage(message, maxLength = 2000) {
 client.on('interactionCreate', async interaction => {
     if (!interaction.isCommand()) return;
 
-    const { commandName } = interaction;
+    const { commandName, options } = interaction;
+
+    if (commandName === 'missions') {
+        const type = options.getString('type');
+        if (type === 'next') {
+            await sendBiomesEmbed(interaction, NEXT_MISSIONS_URL);
+        } else {
+            await sendBiomesEmbed(interaction, CURRENT_MISSIONS_URL);
+        }
+        return;
+    }
 
     if (commandName === 'deepdive') {
 
