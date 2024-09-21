@@ -74,8 +74,22 @@ const emojiMap = {
     "Black_Box": '1285906118664650752',
     "Bha_Barnacles": '1285906081142538241',
     "Azure_Weald": '1285905982412816475',
-    "ApocaBlooms": '1285905917417619456'
+    "ApocaBlooms": '1285905917417619456',
+    "Glyphid_Eggs": '1287028555183820840',
 };
+
+const biomePngs = {
+    "Crystalline Caverns": "https://deeprockgalactic.wiki.gg/images/thumb/4/44/Crystalline_caverns_icon.png/50px-Crystalline_caverns_icon.png",
+    "Salt Pits": "https://deeprockgalactic.wiki.gg/images/thumb/3/30/Salt_pits_icon.png/50px-Salt_pits_icon.png",
+    "Fungus Bogs": "https://deeprockgalactic.wiki.gg/images/thumb/9/97/Fungus_bogs_icon.png/50px-Fungus_bogs_icon.png",
+    "Radioactive Exclusion Zone": "https://deeprockgalactic.wiki.gg/images/thumb/f/f1/Radioactive_exclusion_zone_icon.png/50px-Radioactive_exclusion_zone_icon.png",
+    "Glacial Strata": "https://deeprockgalactic.wiki.gg/images/thumb/e/e8/Glacial_strata_icon.png/50px-Glacial_strata_icon.png",
+    "Dense Biozone": "https://deeprockgalactic.wiki.gg/images/thumb/a/ac/Dense_biozone_icon.png/50px-Dense_biozone_icon.png",
+    "Hollow Bough": "https://deeprockgalactic.wiki.gg/images/thumb/7/7c/Hollow_bough_icon.png/50px-Hollow_bough_icon.png",
+    "Azure Weald": "https://deeprockgalactic.wiki.gg/images/thumb/f/f9/Azure_weald_icon.png/50px-Azure_weald_icon.png",
+    "Sandblasted Corridors": "https://deeprockgalactic.wiki.gg/images/thumb/4/4e/Sandblasted_corridors_icon.png/50px-Sandblasted_corridors_icon.png",
+    "Magma Core": "https://deeprockgalactic.wiki.gg/images/thumb/0/00/Magma_core_icon.png/50px-Magma_core_icon.png",
+}
 
 // Function to get an emoji by name
 function getEmojiByName(name) {
@@ -84,8 +98,33 @@ function getEmojiByName(name) {
     return emojiId ? `<:${formattedEmoteName}:${emojiId}>` : null;
 }
 
+function getBiomeByName(name) {
+    const biomePng = biomePngs[name];
+    return biomePng ? biomePng : null;
+}
+
+function getBiomeColorByName(name) {
+    const colors = {
+        "Crystalline Caverns": "#00BFFF", // Deep Sky Blue
+        "Salt Pits": "#C0C0C0", // Silver
+        "Fungus Bogs": "#6B8E23", // Olive Drab
+        "Radioactive Exclusion Zone": "#8B0000", // Dark Red
+        "Glacial Strata": "#A9A9A9", // Dark Gray
+        "Dense Biozone": "#228B22", // Forest Green
+        "Hollow Bough": "#8A2BE2", // Blue Violet
+        "Azure Weald": "#4682B4", // Steel Blue
+        "Sandblasted Corridors": "#D2B48C", // Tan
+        "Magma Core": "#FF4500" // Orange Red
+    };
+
+    return colors[name] || "#FFFFFF"; // Return white if biome not found
+}
+
+
 // Export the function and mapping
 module.exports = {
     getEmojiByName,
+    getBiomeByName,
+    getBiomeColorByName,
     emojiMap
 };
